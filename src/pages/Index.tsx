@@ -1,16 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import SiteHeader from "@/components/SiteHeader";
+import FeaturedArticle from "@/components/FeaturedArticle";
+import SidebarArticle from "@/components/SidebarArticle";
+import RightSidebarArticle from "@/components/RightSidebarArticle";
+import { sidebarArticlesLeft, sidebarArticlesRight } from "@/data/articles";
+import sidebarImg1 from "@/assets/sidebar-right-1.jpg";
+import sidebarImg2 from "@/assets/sidebar-right-2.jpg";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const rightImages = [sidebarImg1, sidebarImg2];
+
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <SiteHeader />
+      <main className="container py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_240px] gap-8">
+          {/* Left sidebar */}
+          <aside className="hidden lg:flex flex-col gap-6">
+            {sidebarArticlesLeft.map((article, i) => (
+              <SidebarArticle key={article.id} article={article} showDivider={i > 0} />
+            ))}
+          </aside>
+
+          {/* Featured center */}
+          <div>
+            <FeaturedArticle />
+          </div>
+
+          {/* Right sidebar */}
+          <aside className="hidden lg:flex flex-col gap-0">
+            {sidebarArticlesRight.map((article, i) => (
+              <RightSidebarArticle
+                key={article.id}
+                article={article}
+                image={rightImages[i]}
+                showDivider={i > 0}
+              />
+            ))}
+          </aside>
+        </div>
+      </main>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
