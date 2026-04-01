@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Twitter } from "lucide-react";
 import TweetCard from "@/components/TweetCard";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tweet } from "@/data/tweets";
@@ -46,8 +47,8 @@ const Index = () => {
             <h1 className="font-display text-3xl md:text-5xl font-black tracking-tight text-foreground italic">
               <span className="bg-primary text-primary-foreground px-1 rounded-sm leading-[0.85]">Autonomous</span> Capitalism
             </h1>
-            <p className="text-muted-foreground font-body text-sm md:text-base mt-2 tracking-wide">
-              Live from X — the autonomous revolution in real time.
+            <p className="text-primary font-body text-xl md:text-2xl mt-6 tracking-wide flex items-center justify-center gap-2">
+              Live from <Twitter className="w-6 h-6 md:w-7 md:h-7 fill-primary text-primary" /> — the autonomous revolution in real time.
             </p>
           </div>
         </div>
