@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import TweetCard from "@/components/TweetCard";
-import { tweets as mockTweets } from "@/data/tweets";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tweet } from "@/data/tweets";
 import { Loader2 } from "lucide-react";
@@ -37,7 +36,7 @@ const Index = () => {
     timestamp: formatTimestamp(t.timestamp),
   }));
 
-  const displayTweets = tweets.length > 0 ? tweets : mockTweets;
+  const displayTweets = tweets;
 
   return (
     <div className="min-h-screen bg-background">
