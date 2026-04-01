@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url)
     const query = url.searchParams.get('query') || 'autonomous'
-    const maxResults = url.searchParams.get('max_results') || '20'
+    const maxResults = url.searchParams.get('max_results') || '50'
 
     const twitterUrl = new URL('https://api.x.com/2/tweets/search/recent')
     twitterUrl.searchParams.set('query', `${query} -is:retweet lang:en`)
