@@ -35,19 +35,19 @@ const TickerCard = ({ tweet }: { tweet: Tweet }) => {
     >
       <div className="flex items-center gap-1.5 mb-1">
         {tweet.avatarUrl ? (
-          <img src={tweet.avatarUrl} alt={tweet.username} className="w-4 h-4 rounded-full object-cover opacity-60" />
+          <img src={tweet.avatarUrl} alt={tweet.username} className="w-6 h-6 rounded-full object-cover opacity-60" />
         ) : (
-          <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[8px] font-bold text-muted-foreground font-body">
+          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[12px] font-bold text-muted-foreground font-body">
             {tweet.avatar}
           </div>
         )}
-        <span className="text-xs text-foreground/40 font-body truncate group-hover:text-foreground transition-colors">
+        <span className="text-base text-foreground/40 font-body truncate group-hover:text-foreground transition-colors">
           {tweet.handle}
         </span>
-        {tweet.verified && <BadgeCheck className="w-4 h-4 text-primary/40 shrink-0" />}
-        <span className="text-foreground/20 text-xs font-body shrink-0 ml-auto group-hover:text-foreground transition-colors">{tweet.timestamp}</span>
+        {tweet.verified && <BadgeCheck className="w-5 h-5 text-primary/40 shrink-0" />}
+        <span className="text-foreground/20 text-base font-body shrink-0 ml-auto group-hover:text-foreground transition-colors">{tweet.timestamp}</span>
       </div>
-      <p className="text-foreground/50 text-sm leading-relaxed font-body break-words group-hover:text-foreground transition-colors">
+      <p className="text-foreground/50 text-lg leading-relaxed font-body break-words group-hover:text-foreground transition-colors">
         {highlightAutonomous(trimAfterAutonomous(tweet.content))}
       </p>
     </a>
