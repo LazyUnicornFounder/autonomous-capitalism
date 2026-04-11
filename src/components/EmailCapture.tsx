@@ -60,14 +60,14 @@ const EmailCapture = ({ variant = "default" }: { variant?: "default" | "compact"
 
   if (variant === "hero") {
     return (
-      <div className="border border-border p-6 md:p-8 text-center">
+      <div className="text-left">
         <h3 className="font-display font-black text-xl md:text-2xl mb-2 text-foreground">
-          Get the <span className="text-primary">Autonomous Dispatch</span>
+          Get the <span className="text-primary">Autonomous Daily Briefings</span>
         </h3>
         <p className="text-muted-foreground font-body text-sm mb-4">
           AI-curated stories from the autonomous revolution. Delivered daily.
         </p>
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md">
           <input
             type="email"
             value={email}
