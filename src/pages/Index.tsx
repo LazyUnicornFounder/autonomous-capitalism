@@ -71,7 +71,7 @@ const Index = () => {
       </section>
 
       {/* Live feed */}
-      <section className="container py-8 px-4">
+      <section id="live" className="container py-8 px-4">
         <div className="flex items-center justify-center gap-3 mb-8">
           <span className="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
           <h2 className="font-display font-black text-3xl md:text-5xl tracking-tight text-foreground flex items-center gap-3">
