@@ -62,7 +62,7 @@ const EmailCapture = ({ variant = "default" }: { variant?: "default" | "compact"
     return (
       <div className="text-left">
         <h3 className="font-display font-black text-xl md:text-2xl mb-2 text-foreground">
-          Get the <span className="text-primary">Autonomous Daily Briefings</span>
+          Get the <span className="text-primary">Daily Autonomous Briefings</span>
         </h3>
         <p className="text-muted-foreground font-body text-sm mb-4">
           AI-curated stories from the autonomous revolution. Delivered daily.
