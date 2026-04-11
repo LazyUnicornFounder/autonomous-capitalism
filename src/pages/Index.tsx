@@ -16,6 +16,7 @@ const fetchTweets = async (): Promise<Tweet[]> => {
 
 const formatTimestamp = (ts: string) => {
   const diff = Date.now() - new Date(ts).getTime();
+  if (isNaN(diff) || diff < 0) return "";
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
