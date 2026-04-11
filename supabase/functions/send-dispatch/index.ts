@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
       })
       .join("");
 
-    const emailHtml = `
+    const buildEmailHtml = (subscriberEmail: string) => {
+      const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe?email=${encodeURIComponent(subscriberEmail)}`;
+      return `
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -118,7 +120,7 @@ Deno.serve(async (req) => {
             Autonomous Capitalism is part of <a href="https://lazyfactoryventures.com" style="color:#0099ff;text-decoration:none;">Lazy Factory Ventures</a>
           </p>
           <p style="margin:12px 0 0;font-size:11px;color:#555;">
-            <a href="${supabaseUrl}/functions/v1/unsubscribe?email=\${encodeURIComponent(sub.email)}" style="color:#555;text-decoration:underline;">Unsubscribe</a>
+            <a href="${unsubscribeUrl}" style="color:#555;text-decoration:underline;">Unsubscribe</a>
           </p>
         </td></tr>
       </table>
@@ -126,6 +128,7 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>`;
+    };
 
     // Send emails via Resend gateway (batch up to 100 at a time)
     const batchSize = 50;
@@ -149,7 +152,7 @@ Deno.serve(async (req) => {
               from: "Autonomous Capitalism <dispatch@autonomouscapitalism.com>",
               to: [sub.email],
               subject: `🤖 ${post.title}`,
-              html: emailHtml,
+              html: buildEmailHtml(sub.email),
             }),
           });
 
