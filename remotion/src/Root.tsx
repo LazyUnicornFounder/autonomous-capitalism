@@ -26,7 +26,7 @@ export const RemotionRoot = () => (
       width={1920}
       height={1080}
       defaultProps={{
-        sentence: "I hid 400 acorns last fall and I remember every single one.",
+        sentence: "The era of the chatbot wrapper is dying a quiet, unceremonious death. Get more autonomous news at autonomouscapitalism.com",
         videoUrl: "https://id-preview--1d83a6f6-ae76-4891-b5be-105174dc52a9.lovable.app/__l5e/assets-v1/fb720f2f-d1d5-4419-8186-a7bfb3dacff4/squirrel-talking.mp4",
       }}
     />
