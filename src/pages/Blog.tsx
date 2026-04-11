@@ -100,7 +100,7 @@ const Blog = () => {
                   {format(new Date(post.published_date), "MMMM d, yyyy")}
                 </span>
                 <span className="text-xs text-muted-foreground font-body">
-                  · {post.tweet_count} tweets analyzed
+                  · {post.tweet_count} X posts analyzed
                 </span>
               </div>
               {post.image_url && (

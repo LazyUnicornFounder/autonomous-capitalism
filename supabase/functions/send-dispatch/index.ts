@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
             ${post.title}
           </h2>
           <p style="margin:0 0 24px;font-size:12px;color:#888;letter-spacing:1px;">
-            ${post.tweet_count} TWEETS ANALYZED
+            ${post.tweet_count} X POSTS ANALYZED
           </p>
           ${contentHtml}
         </td></tr>
