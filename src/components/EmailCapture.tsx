@@ -20,17 +20,11 @@ const EmailCapture = ({ variant = "default" }: { variant?: "default" | "compact"
 
   const subscribe = useMutation({
     mutationFn: async (emailAddr: string) => {
-      const { error } = await supabase
-        .from("subscribers")
-        .insert({ email: emailAddr } as any);
-      if (error) {
-        if (error.code === "23505") throw new Error("already_subscribed");
-        throw error;
-      }
-      // Send the most recent dispatch to the new subscriber
-      supabase.functions.invoke("send-dispatch", {
-        body: { singleEmail: emailAddr },
-      }).catch((e) => console.error("Welcome dispatch failed:", e));
+      const { data, error } = await supabase.functions.invoke("subscribe", {
+        body: { email: emailAddr },
+      });
+      if (error) throw error;
+      if (data?.status === "already_subscribed") throw new Error("already_subscribed");
     },
     onSuccess: () => {
       toast.success("You're in! Check your spam folder and move us to Primary so you never miss a dispatch.", {
