@@ -166,7 +166,7 @@ const Ideas = () => {
       <main className="container py-8 px-4 max-w-3xl mx-auto">
         <div className="border border-primary/30 p-8 mb-8">
           <h3 className="font-display font-black text-xl text-foreground mb-2">
-            Get fresh <span className="text-primary">business ideas</span> in your inbox daily
+            Get fresh <span className="text-primary">autonomous business ideas</span> in your inbox daily
           </h3>
           <p className="text-muted-foreground font-body text-sm mb-4">
             Every day, AI analyzes hundreds of X posts and generates actionable autonomous business ideas — delivered straight to your inbox alongside your daily briefing.
