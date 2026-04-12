@@ -38,9 +38,11 @@ async function fetchAllTweets(bearerToken: string, query: string, maxTotal = 200
       for (const t of data.data) {
         const user = users[t.author_id] || {};
         allTweets.push({
+          id: t.id,
           text: t.text,
           author: user.name || "Unknown",
           handle: `@${user.username || "unknown"}`,
+          username: user.username || "unknown",
           likes: t.public_metrics?.like_count || 0,
           retweets: t.public_metrics?.retweet_count || 0,
         });
@@ -168,7 +170,7 @@ Deno.serve(async (req) => {
     const tweetDigest = tweets
       .map(
         (t: any, i: number) =>
-          `${i + 1}. ${t.author} (${t.handle}): "${t.text}" [${t.likes} likes, ${t.retweets} RTs]`
+          `${i + 1}. ${t.author} (${t.handle}): "${t.text}" [${t.likes} likes, ${t.retweets} RTs] URL: https://x.com/${t.username}/status/${t.id}`
       )
       .join("\n");
 
@@ -239,17 +241,19 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
           messages: [
             {
               role: "system",
-              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's X posts about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed. Each idea should be:
+              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's X posts about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed.
 
-Format each idea as:
+Format each idea EXACTLY as:
 ### [Idea Name]
 One paragraph (3-5 sentences) describing the opportunity, target market, why now, and how autonomous technology makes it viable.
 
-Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas.`,
+**Relevant posts:** [list 2-3 X post URLs from the provided tweets that inspired this idea, formatted as markdown links like [Author Name](url)]
+
+Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas. ALWAYS include the "Relevant posts:" line with actual URLs from the tweet list.`,
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} tweets about autonomous systems. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 8000)}`,
+              content: `Here are today's ${tweets.length} tweets about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
             },
           ],
         }),
