@@ -130,16 +130,14 @@ Deno.serve(async (req) => {
 </html>`;
     };
 
-    // Send emails via Resend gateway (batch up to 100 at a time)
-    const batchSize = 50;
+    // Send emails sequentially with delay to avoid rate limits, with retry
     let sent = 0;
     let failed = 0;
+    const maxRetries = 3;
 
-    for (let i = 0; i < subscribers.length; i += batchSize) {
-      const batch = subscribers.slice(i, i + batchSize);
-
-      // Send individually to each subscriber via Resend
-      const promises = batch.map(async (sub: any) => {
+    for (const sub of subscribers) {
+      let success = false;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           const res = await fetch(`${GATEWAY_URL}/emails`, {
             method: "POST",
@@ -158,23 +156,29 @@ Deno.serve(async (req) => {
 
           if (res.ok) {
             sent++;
+            success = true;
+            break;
+          } else if (res.status === 429 && attempt < maxRetries) {
+            const retryAfter = parseInt(res.headers.get("retry-after") || "2", 10);
+            console.warn(`Rate limited sending to ${sub.email}, retrying in ${retryAfter}s (attempt ${attempt}/${maxRetries})`);
+            await res.text(); // consume body
+            await new Promise((r) => setTimeout(r, retryAfter * 1000));
           } else {
             const err = await res.text();
-            console.error(`Failed to send to ${sub.email}:`, err);
-            failed++;
+            console.error(`Failed to send to ${sub.email} (attempt ${attempt}):`, err);
+            if (attempt === maxRetries) break;
+            await new Promise((r) => setTimeout(r, 1000));
           }
         } catch (e) {
-          console.error(`Error sending to ${sub.email}:`, e);
-          failed++;
+          console.error(`Error sending to ${sub.email} (attempt ${attempt}):`, e);
+          if (attempt === maxRetries) break;
+          await new Promise((r) => setTimeout(r, 1000));
         }
-      });
-
-      await Promise.all(promises);
-
-      // Small delay between batches
-      if (i + batchSize < subscribers.length) {
-        await new Promise((r) => setTimeout(r, 500));
       }
+      if (!success) failed++;
+
+      // 600ms delay between sends to stay under 2 req/s limit
+      await new Promise((r) => setTimeout(r, 600));
     }
 
     console.log(`Dispatch sent: ${sent} succeeded, ${failed} failed out of ${subscribers.length}`);
