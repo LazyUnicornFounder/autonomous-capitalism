@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Loader2, Lightbulb } from "lucide-react";
+import { Loader2, Lightbulb, Copy, Check } from "lucide-react";
 import EmailCapture from "@/components/EmailCapture";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 type BlogPost = {
   id: string;
@@ -155,10 +157,12 @@ const Ideas = () => {
                       ))}
                     </div>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-body">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-body flex-wrap">
                     <span>{format(new Date(idea.date), "MMM d, yyyy")}</span>
                     <span>·</span>
                     <Link to={`/briefings/${idea.postId}`} className="text-primary hover:underline">From briefing →</Link>
+                    <span>·</span>
+                    <CopyPromptButton idea={idea} />
                   </div>
                 </div>
               </div>
