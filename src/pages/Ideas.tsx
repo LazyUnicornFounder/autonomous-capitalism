@@ -79,6 +79,50 @@ const fetchIdeas = async (): Promise<{ ideas: BusinessIdea[]; posts: BlogPost[] 
   return { ideas: extractIdeas(posts), posts };
 };
 
+const buildPrompt = (idea: BusinessIdea) =>
+  `Build me a modern, conversion-focused landing page for a startup called "${idea.name}".
+
+Business concept: ${idea.description}
+
+The landing page should include:
+1. A bold hero section with a compelling headline, subheadline explaining the value proposition, and a prominent CTA button (e.g. "Join the Waitlist" or "Get Early Access")
+2. A "How It Works" section with 3 steps
+3. A features/benefits section with 3-4 key differentiators
+4. A social proof or "Why Now" section explaining the market timing
+5. An email capture form for early access signups
+6. A clean footer with links
+
+Design style: Dark theme, modern SaaS aesthetic, bold typography. Use a primary accent color that fits the brand. Make it feel premium and trustworthy.
+
+Tech stack: React, Tailwind CSS, responsive design. Single page, no routing needed.`;
+
+const CopyPromptButton = ({ idea }: { idea: BusinessIdea }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(buildPrompt(idea));
+      setCopied(true);
+      toast.success("Prompt copied! Paste it into Lovable to build your landing page.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors font-body"
+    >
+      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+      {copied ? "Copied!" : "Copy launch prompt"}
+    </button>
+  );
+};
+
 const Ideas = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["business-ideas"],
