@@ -130,7 +130,7 @@ const Index = () => {
             <div className="flex-1">
               <span className="bg-primary text-primary-foreground text-xs font-body font-bold tracking-widest px-2 py-0.5 mb-4 inline-block">IDEAS LAB</span>
               <h2 className="font-display font-black text-2xl md:text-4xl text-foreground mb-4">
-                Trends become<br /><span className="text-primary">business ideas.</span>
+Trends become<br /><span className="text-primary">business ideas.</span>
               </h2>
               <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed mb-6">
                 AI doesn't just summarize — it spots gaps. Every briefing generates 3–5 concrete, actionable autonomous business ideas with a one-click prompt to launch a landing page.
