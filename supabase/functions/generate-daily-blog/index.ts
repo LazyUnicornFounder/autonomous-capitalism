@@ -277,7 +277,7 @@ Be specific — include concrete product concepts, not vague "AI platform" ideas
 
     const { data: insertedPost, error: insertError } = await supabase.from("blog_posts").insert({
       title,
-      content: body,
+      content: body + ideasSection,
       summary,
       tweet_count: tweets.length,
       published_date: today,
