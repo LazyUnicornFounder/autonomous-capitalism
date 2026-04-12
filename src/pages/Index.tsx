@@ -89,6 +89,89 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Briefings Section */}
+      <section className="border-b border-border py-16 md:py-24">
+        <div className="container px-4 max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-10 items-center">
+            <div className="flex-1">
+              <span className="bg-primary text-primary-foreground text-xs font-body font-bold tracking-widest px-2 py-0.5 mb-4 inline-block">BRIEFINGS</span>
+              <h2 className="font-display font-black text-2xl md:text-4xl text-foreground mb-4">
+                One daily briefing.<br /><span className="text-primary">Zero noise.</span>
+              </h2>
+              <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed mb-6">
+                Every morning, AI reads hundreds of X posts about autonomous systems and distills them into a single, story-driven narrative. No lists, no fluff — just the signal that matters for business, finance, and society.
+              </p>
+              <a href="/briefings" className="inline-block bg-primary text-primary-foreground px-6 py-2.5 font-body font-bold text-sm tracking-wider hover:bg-primary/90 transition-colors">
+                READ BRIEFINGS →
+              </a>
+            </div>
+            <div className="flex-1 space-y-4">
+              <div className="flex gap-4">
+                <span className="text-primary font-display font-black text-lg shrink-0">01</span>
+                <p className="text-foreground/80 font-body text-sm">AI scans 500+ X posts daily about autonomous agents, machines, and systems.</p>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-primary font-display font-black text-lg shrink-0">02</span>
+                <p className="text-foreground/80 font-body text-sm">Posts are ranked by engagement and synthesized into a cohesive narrative.</p>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-primary font-display font-black text-lg shrink-0">03</span>
+                <p className="text-foreground/80 font-body text-sm">You get one sharp briefing delivered to your inbox every morning.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ideas Section */}
+      <section className="border-b border-border py-16 md:py-24">
+        <div className="container px-4 max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row-reverse gap-10 items-center">
+            <div className="flex-1">
+              <span className="bg-primary text-primary-foreground text-xs font-body font-bold tracking-widest px-2 py-0.5 mb-4 inline-block">IDEAS LAB</span>
+              <h2 className="font-display font-black text-2xl md:text-4xl text-foreground mb-4">
+                Trends become<br /><span className="text-primary">business ideas.</span>
+              </h2>
+              <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed mb-6">
+                AI doesn't just summarize — it spots gaps. Every briefing generates 3–5 concrete, actionable autonomous business ideas with a one-click prompt to launch a landing page.
+              </p>
+              <a href="/ideas" className="inline-block bg-primary text-primary-foreground px-6 py-2.5 font-body font-bold text-sm tracking-wider hover:bg-primary/90 transition-colors">
+                EXPLORE IDEAS →
+              </a>
+            </div>
+            <div className="flex-1 space-y-3">
+              <div className="border border-border p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-primary font-display font-black text-lg shrink-0">01</span>
+                  <div>
+                    <h4 className="font-display font-black text-sm text-foreground mb-1">Autonomous Naval Leasing</h4>
+                    <p className="text-muted-foreground font-body text-xs leading-relaxed">Fleet-as-a-service for maritime logistics using autonomous vessels.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-border p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-primary font-display font-black text-lg shrink-0">02</span>
+                  <div>
+                    <h4 className="font-display font-black text-sm text-foreground mb-1">Agentic Compliance Engine</h4>
+                    <p className="text-muted-foreground font-body text-xs leading-relaxed">Real-time autonomy scoring for AI agent standardization.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-border p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-primary font-display font-black text-lg shrink-0">03</span>
+                  <div>
+                    <h4 className="font-display font-black text-sm text-foreground mb-1">Drone Delivery Cooperative</h4>
+                    <p className="text-muted-foreground font-body text-xs leading-relaxed">Decentralized marketplace for leasing autonomous delivery drones.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="about" className="border-t border-border py-16 md:py-24">
         <div className="container px-4 max-w-2xl mx-auto text-center">
           <div className="flex items-center justify-center gap-5 mb-4">
