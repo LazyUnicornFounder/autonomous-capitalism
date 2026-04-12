@@ -16,31 +16,49 @@ type BlogPost = {
 type BusinessIdea = {
   name: string;
   description: string;
+  links: { label: string; url: string }[];
   date: string;
   postId: string;
+};
+
+const parseLinks = (text: string): { clean: string; links: { label: string; url: string }[] } => {
+  const links: { label: string; url: string }[] = [];
+  // Match **Relevant posts:** line and extract markdown links
+  const relevantMatch = text.match(/\*?\*?Relevant posts:\*?\*?\s*(.*)/i);
+  if (relevantMatch) {
+    const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    let m;
+    while ((m = linkRegex.exec(relevantMatch[1])) !== null) {
+      links.push({ label: m[1], url: m[2] });
+    }
+  }
+  // Also find bare x.com URLs
+  if (links.length === 0) {
+    const bareUrlRegex = /(https:\/\/x\.com\/\w+\/status\/\d+)/g;
+    let m;
+    while ((m = bareUrlRegex.exec(text)) !== null) {
+      links.push({ label: "View post", url: m[1] });
+    }
+  }
+  const clean = text.replace(/\*?\*?Relevant posts:\*?\*?\s*.*/gi, "").trim();
+  return { clean, links };
 };
 
 const extractIdeas = (posts: BlogPost[]): BusinessIdea[] => {
   const ideas: BusinessIdea[] = [];
   for (const post of posts) {
-    // Look for the ideas section
     const ideasMatch = post.content.split(/## Business Ideas From Today's Trends/i);
     if (ideasMatch.length < 2) continue;
     const ideasSection = ideasMatch[1];
-    
-    // Parse ### headings
+
     const ideaBlocks = ideasSection.split(/### /).filter(Boolean);
     for (const block of ideaBlocks) {
       const lines = block.trim().split("\n");
       const name = lines[0].trim().replace(/^\[|\]$/g, "");
-      const description = lines.slice(1).join(" ").trim();
-      if (name && description) {
-        ideas.push({
-          name,
-          description,
-          date: post.published_date,
-          postId: post.id,
-        });
+      const rawDesc = lines.slice(1).join("\n").trim();
+      const { clean, links } = parseLinks(rawDesc);
+      if (name && clean) {
+        ideas.push({ name, description: clean, links, date: post.published_date, postId: post.id });
       }
     }
   }
