@@ -1,0 +1,1 @@
+UPDATE blog_posts SET title = 'The machine economy balances its own checkbook' WHERE id = 'bd21ecb5-4abb-4138-bc10-e90b73798d66';
