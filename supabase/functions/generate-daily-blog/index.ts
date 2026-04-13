@@ -349,7 +349,7 @@ Be specific — include concrete product concepts, not vague "AI platform" ideas
 
     console.log(`Daily blog post generated from ${tweets.length} tweets`);
     return new Response(
-      JSON.stringify({ message: "Blog post generated and dispatched", title, tweet_count: tweets.length, image_url: imageUrl }),
+      JSON.stringify({ message: "Blog post generated, dispatched, and sent to Substack", title, tweet_count: tweets.length, image_url: imageUrl }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
