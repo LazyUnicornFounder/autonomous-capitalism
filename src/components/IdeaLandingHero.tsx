@@ -238,122 +238,46 @@ const IdeaLandingHero = ({ idea, index }: { idea: Idea; index: number }) => {
     </>
   );
 
-  // Layout variants
-  let inner: React.ReactNode;
-  switch (layout) {
-    case "split":
-      inner = (
-        <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
-          <div>
-            {accentBadge}
-            {headline}
-            {sub}
-            {SignupForm}
-            {meta}
-          </div>
-          <div className="hidden md:flex items-center justify-center">
-            <div
-              className="aspect-square w-full max-w-sm flex items-center justify-center"
-              style={{
-                border: `2px solid ${palette.accent}`,
-                background: `linear-gradient(135deg, ${palette.accent}10, transparent)`,
-              }}
-            >
-              <div
-                className="font-black"
-                style={{
-                  fontFamily: fonts.display,
-                  fontSize: "8rem",
-                  color: palette.accent,
-                  lineHeight: 1,
-                }}
-              >
-                {String(index + 1).padStart(2, "0")}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-      break;
-    case "asymmetric-left":
-      inner = (
-        <div className="relative z-10 max-w-3xl">
-          {accentBadge}
-          {headline}
-          {sub}
-          {SignupForm}
-          {meta}
-        </div>
-      );
-      break;
-    case "asymmetric-right":
-      inner = (
-        <div className="relative z-10 max-w-3xl ml-auto text-right">
-          <div className="flex justify-end">{accentBadge}</div>
-          {headline}
-          <p
-            className="mb-8 leading-relaxed max-w-xl ml-auto"
-            style={{ fontFamily: fonts.body, color: palette.muted, fontSize: "clamp(1rem, 1.5vw, 1.2rem)" }}
-          >
-            {subheadline}
-          </p>
-          <div className="flex justify-end">{SignupForm}</div>
-          <div className="flex justify-end">{meta}</div>
-        </div>
-      );
-      break;
-    case "stacked-bold":
-      inner = (
-        <div className="relative z-10">
-          {accentBadge}
-          <h2
-            className="font-black leading-[0.85] tracking-tighter mb-6 uppercase"
-            style={{
-              fontFamily: fonts.display,
-              color: palette.fg,
-              fontSize: "clamp(3rem, 10vw, 8rem)",
-            }}
-          >
-            {idea.name}
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 mt-10">
-            <div>{sub}</div>
-            <div>
-              {SignupForm}
-            </div>
-          </div>
-          {meta}
-        </div>
-      );
-      break;
-    default: // centered
-      inner = (
-        <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <div className="flex justify-center">{accentBadge}</div>
-          {headline}
-          <p
-            className="mb-8 leading-relaxed max-w-xl mx-auto"
-            style={{ fontFamily: fonts.body, color: palette.muted, fontSize: "clamp(1rem, 1.5vw, 1.2rem)" }}
-          >
-            {subheadline}
-          </p>
-          <div className="flex justify-center">{SignupForm}</div>
-          <div className="flex justify-center">{meta}</div>
-        </div>
-      );
-  }
+  // Compact card layout (2-per-row friendly) — keep palette/font/pattern bespoke
+  const inner = (
+    <div className="relative z-10 flex flex-col h-full">
+      {accentBadge}
+      <h2
+        className="font-black leading-[0.95] tracking-tight mb-4"
+        style={{
+          fontFamily: fonts.display,
+          color: palette.fg,
+          fontSize: "clamp(1.75rem, 3vw, 2.75rem)",
+        }}
+      >
+        {idea.name}
+      </h2>
+      <p
+        className="mb-6 leading-relaxed flex-1"
+        style={{
+          fontFamily: fonts.body,
+          color: palette.muted,
+          fontSize: "0.95rem",
+        }}
+      >
+        {subheadline}
+      </p>
+      {SignupForm}
+      {meta}
+    </div>
+  );
 
   return (
     <section
-      className="relative overflow-hidden px-6 md:px-12 py-20 md:py-28"
+      className="relative overflow-hidden px-6 md:px-8 py-10 md:py-12 h-full"
       style={{
         background: palette.bg,
         ...patternStyles[pattern],
-        borderTop: `1px solid ${palette.accent}25`,
+        border: `1px solid ${palette.accent}30`,
       }}
     >
       {blob}
-      <div className="max-w-6xl mx-auto relative">{inner}</div>
+      <div className="relative h-full">{inner}</div>
     </section>
   );
 };
