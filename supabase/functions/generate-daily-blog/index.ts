@@ -166,6 +166,17 @@ Deno.serve(async (req) => {
     // Sort by engagement
     tweets.sort((a, b) => (b.likes + b.retweets) - (a.likes + a.retweets));
 
+    // Fetch recent headlines to avoid similarity
+    const { data: recentPosts } = await supabase
+      .from("blog_posts")
+      .select("title, published_date")
+      .order("published_date", { ascending: false })
+      .limit(30);
+    const recentTitles = (recentPosts || [])
+      .map((p: any) => `- "${p.title}" (${p.published_date})`)
+      .join("\n");
+    console.log(`Loaded ${recentPosts?.length || 0} recent headlines for de-duplication`);
+
     // Build tweet digest for AI
     const tweetDigest = tweets
       .map(
