@@ -210,6 +210,9 @@ Format:
 - Use markdown for bold and italic emphasis
 - IMPORTANT: Do NOT start the article by talking about chatbots. Vary your opening — lead with the most compelling or surprising theme of the day, not a generic chatbot reference.
 
+RECENT HEADLINES TO AVOID DUPLICATING (your headline must be substantially different — different subject, different verb, different framing; do not share 3+ meaningful words with any of these; avoid recurring openers like "Machines are…", "AI is…", "The robots…"):
+${recentTitles || "(none yet)"}
+
 Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily column readers look forward to.`,
             },
             {
