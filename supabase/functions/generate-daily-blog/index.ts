@@ -177,6 +177,17 @@ Deno.serve(async (req) => {
       .join("\n");
     console.log(`Loaded ${recentPosts?.length || 0} recent headlines for de-duplication`);
 
+    // Extract forbidden subject keywords (proper nouns + meaningful nouns) from recent headlines
+    const STOPWORDS_SUBJ = new Set(["the","a","an","is","are","of","to","in","on","and","or","for","with","by","at","as","its","it","this","that","be","from","into","over","new","how","why","but","not","now","up","out","off","you","your","our","we","they","them","their","has","have","had","was","were","will","can","could","should","would","may","might","than","then","so","if","about","after","before","while","when","where","who","what","which","there","here","just","also","more","most","some","any","all","one","two","three","first","last","next","each","other","another","such","only","own","same","very","still","ever","never","once","again","like","make","made","get","got","take","took","go","went","come","came","see","saw","say","said","told","tell","know","knew","think","thought","starts","starting","began","begin","begins","starts","start","starting","ends","end","ending","continues","continue","continuing","says","saying","gets","getting","makes","making","goes","going","comes","coming","sees","seeing","tells","telling","thinks","thinking","becomes","became","becoming","keeps","keeping","kept","puts","putting","put","let","lets","letting","yet","much","many","few","fewer","less","lot","lots","big","small","high","low","old"]);
+    const extractSubjects = (s: string) =>
+      s.replace(/[^\w\s'-]/g, " ").split(/\s+/).filter((w) => w && w.length > 2 && !STOPWORDS_SUBJ.has(w.toLowerCase()));
+    const recentSubjectSet = new Set<string>();
+    for (const p of recentPosts || []) {
+      for (const w of extractSubjects(p.title)) recentSubjectSet.add(w.toLowerCase());
+    }
+    const forbiddenSubjects = Array.from(recentSubjectSet).sort();
+    console.log(`Forbidden subject keywords (${forbiddenSubjects.length}): ${forbiddenSubjects.slice(0, 40).join(", ")}...`);
+
     // Build tweet digest for AI
     const tweetDigest = tweets
       .map(
