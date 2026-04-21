@@ -271,9 +271,16 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
       for (const w of A) if (B.has(w)) inter++;
       return inter / Math.min(A.size, B.size);
     };
-    const tooSimilar = (recentPosts || []).find((p: any) => similarity(title, p.title) >= 0.5);
-    if (tooSimilar) {
-      console.warn(`Headline "${title}" too similar to recent "${tooSimilar.title}" — requesting rewrite`);
+    const titleSubjectsLower = extractSubjects(title).map((w) => w.toLowerCase());
+    let overlapSubject = titleSubjectsLower.find((w) => recentSubjectSet.has(w));
+    let tooSimilar = (recentPosts || []).find((p: any) => similarity(title, p.title) >= 0.5);
+    let rewriteAttempts = 0;
+    while ((tooSimilar || overlapSubject) && rewriteAttempts < 3) {
+      rewriteAttempts++;
+      const reason = overlapSubject
+        ? `contains forbidden subject "${overlapSubject}" already used in recent headlines`
+        : `too similar to recent "${tooSimilar.title}"`;
+      console.warn(`Headline "${title}" ${reason} — requesting rewrite (attempt ${rewriteAttempts})`);
       try {
         const rewriteRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -281,25 +288,28 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [
-              { role: "system", content: `Rewrite the given headline so it is substantially different from ALL of these recent headlines (different subject, verb, and framing; do not share 3+ meaningful words with any). Max 10 words. No periods. No markdown. Reply with ONLY the new headline text.\n\nRecent headlines:\n${recentTitles}` },
-              { role: "user", content: `Original headline: ${title}\n\nArticle opening: ${body.substring(0, 600)}` },
+              { role: "system", content: `Rewrite the given headline so it covers a COMPLETELY DIFFERENT STORY than these recent headlines. Different company, person, event, and topic. Max 10 words. No periods. No markdown. Reply with ONLY the new headline text.\n\nRecent headlines:\n${recentTitles}\n\nFORBIDDEN WORDS (do NOT use ANY of these): ${forbiddenSubjects.join(", ")}\n\nPick a different angle from the article body — focus on a subject NOT in the forbidden list.` },
+              { role: "user", content: `Original headline: ${title}\n\nArticle opening: ${body.substring(0, 800)}` },
             ],
           }),
         });
-        if (rewriteRes.ok) {
-          const rd = await rewriteRes.json();
-          const raw = (rd.choices?.[0]?.message?.content || "").trim().split("\n")[0];
-          const newTitle = raw.replace(/^#+\s*/, "").replace(/^["*]+|["*.]+$/g, "").trim();
-          if (newTitle) {
-            const nw = newTitle.split(/\s+/);
-            title = nw.length > 10 ? nw.slice(0, 10).join(" ") : newTitle;
-            console.log(`Rewritten headline: "${title}"`);
-          }
-        } else {
+        if (!rewriteRes.ok) {
           console.error("Rewrite failed (non-fatal):", rewriteRes.status);
+          break;
         }
+        const rd = await rewriteRes.json();
+        const raw = (rd.choices?.[0]?.message?.content || "").trim().split("\n")[0];
+        const newTitle = raw.replace(/^#+\s*/, "").replace(/^["*]+|["*.]+$/g, "").trim();
+        if (!newTitle) break;
+        const nw = newTitle.split(/\s+/);
+        title = nw.length > 10 ? nw.slice(0, 10).join(" ") : newTitle;
+        console.log(`Rewritten headline (attempt ${rewriteAttempts}): "${title}"`);
+        const newSubjects = extractSubjects(title).map((w) => w.toLowerCase());
+        overlapSubject = newSubjects.find((w) => recentSubjectSet.has(w));
+        tooSimilar = (recentPosts || []).find((p: any) => similarity(title, p.title) >= 0.5);
       } catch (e) {
         console.error("Rewrite error (non-fatal):", e);
+        break;
       }
     }
 
