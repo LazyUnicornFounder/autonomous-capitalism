@@ -6,54 +6,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function fetchAllTweets(bearerToken: string, query: string, maxTotal = 200) {
-  const allTweets: any[] = [];
-  const users: Record<string, any> = {};
-  let nextToken: string | undefined;
-
-  while (allTweets.length < maxTotal) {
-    const twitterUrl = new URL("https://api.x.com/2/tweets/search/recent");
-    twitterUrl.searchParams.set("query", `${query} -is:retweet lang:en`);
-    twitterUrl.searchParams.set("max_results", "100");
-    twitterUrl.searchParams.set("tweet.fields", "created_at,public_metrics,author_id");
-    twitterUrl.searchParams.set("expansions", "author_id");
-    twitterUrl.searchParams.set("user.fields", "name,username");
-    if (nextToken) twitterUrl.searchParams.set("next_token", nextToken);
-
-    const res = await fetch(twitterUrl.toString(), {
-      headers: { Authorization: `Bearer ${bearerToken}` },
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("Twitter API error:", JSON.stringify(data));
-      throw new Error(`Twitter API error: ${data.detail || data.title}`);
-    }
-
-    if (data.includes?.users) {
-      for (const u of data.includes.users) users[u.id] = u;
-    }
-
-    if (data.data) {
-      for (const t of data.data) {
-        const user = users[t.author_id] || {};
-        allTweets.push({
-          id: t.id,
-          text: t.text,
-          author: user.name || "Unknown",
-          handle: `@${user.username || "unknown"}`,
-          username: user.username || "unknown",
-          likes: t.public_metrics?.like_count || 0,
-          retweets: t.public_metrics?.retweet_count || 0,
-        });
-      }
-    }
-
-    nextToken = data.meta?.next_token;
-    if (!nextToken || !data.data?.length) break;
+async function fetchAllItems(supabaseUrl: string, serviceKey: string): Promise<any[]> {
+  const res = await fetch(`${supabaseUrl}/functions/v1/news-feed`, {
+    headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`news-feed error: ${res.status} ${t}`);
   }
-
-  return allTweets;
+  const data = await res.json();
+  const items = data.items || data.tweets || [];
+  return items.map((i: any) => ({
+    id: i.id,
+    text: i.content,
+    author: i.username,
+    handle: i.handle,
+    username: (i.handle || "").replace(/^@/, ""),
+    likes: i.likes || 0,
+    retweets: i.retweets || 0,
+    url: i.url,
+  }));
 }
 
 async function generateCoverImage(
@@ -120,9 +92,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const bearerToken = Deno.env.get("TWITTER_BEARER_TOKEN");
-    if (!bearerToken) throw new Error("TWITTER_BEARER_TOKEN not configured");
-
     const lovableKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -150,21 +119,21 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fetch tweets with pagination
-    console.log("Fetching all tweets for blog generation...");
-    const tweets = await fetchAllTweets(bearerToken, "autonomous", 200);
+    // Fetch news items from aggregated keyless sources (HN, Google News, Reddit)
+    console.log("Fetching news items for blog generation...");
+    const tweets = await fetchAllItems(supabaseUrl, serviceKey);
 
     if (tweets.length === 0) {
       return new Response(
-        JSON.stringify({ message: "No tweets found to summarize" }),
+        JSON.stringify({ message: "No news items found to summarize" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Collected ${tweets.length} tweets, generating blog...`);
+    console.log(`Collected ${tweets.length} news items, generating blog...`);
 
-    // Sort by engagement
-    tweets.sort((a, b) => (b.likes + b.retweets) - (a.likes + a.retweets));
+    // Sort by engagement (HN points + comments / Reddit score + comments)
+    tweets.sort((a: any, b: any) => (b.likes + b.retweets) - (a.likes + a.retweets));
 
     // Fetch recent headlines to avoid similarity
     const { data: recentPosts } = await supabase
@@ -188,11 +157,11 @@ Deno.serve(async (req) => {
     const forbiddenSubjects = Array.from(recentSubjectSet).sort();
     console.log(`Forbidden subject keywords (${forbiddenSubjects.length}): ${forbiddenSubjects.slice(0, 40).join(", ")}...`);
 
-    // Build tweet digest for AI
+    // Build news digest for AI (real article URLs, not X)
     const tweetDigest = tweets
       .map(
         (t: any, i: number) =>
-          `${i + 1}. ${t.author} (${t.handle}): "${t.text}" [${t.likes} likes, ${t.retweets} RTs] URL: https://x.com/${t.username}/status/${t.id}`
+          `${i + 1}. ${t.author} (${t.handle}): "${t.text}" [${t.likes} pts, ${t.retweets} comments] URL: ${t.url}`
       )
       .join("\n");
 
@@ -210,12 +179,12 @@ Deno.serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are a sharp, witty journalist writing for "Autonomous Capitalism" — a publication tracking the rise of autonomous systems in business, finance, and society. Write in a narrative, story-driven style. Think New Yorker meets Wired. Use vivid language, connect themes across tweets, and weave them into a cohesive daily narrative. The tone is smart, slightly irreverent, and forward-looking.
+              content: `You are a sharp, witty journalist writing for "Autonomous Capitalism" — a publication tracking the rise of autonomous systems in business, finance, and society. Write in a narrative, story-driven style. Think New Yorker meets Wired. Use vivid language, connect themes across news headlines from Hacker News, Google News and Reddit, and weave them into a cohesive daily narrative. The tone is smart, slightly irreverent, and forward-looking.
 
 Format:
 - HEADLINE RULES (MANDATORY): The VERY FIRST LINE of your response must be ONLY the headline. Nothing else on that line. The headline MUST be 10 words or fewer. No periods. No markdown. No formatting. Just the headline text. Example: "Uber bets $10 billion on driverless future". Count every word — if over 10, shorten it. This is non-negotiable.
 - After the headline, leave a blank line, then write 6-10 paragraphs of narrative prose
-- Do NOT mention any Twitter/X handles or usernames — refer to people by name or role only
+- Do NOT mention any social media handles, usernames, or subreddit names — refer to people, companies and publications by name only
 - Group themes: technology breakthroughs, market impacts, labor disruption, policy debates, cultural reactions
 - End with a thought-provoking closing line
 - Use markdown for bold and italic emphasis
@@ -224,14 +193,14 @@ Format:
 RECENT HEADLINES TO AVOID DUPLICATING (your headline must cover a DIFFERENT STORY — different company, different person, different event, different topic; do not share 3+ meaningful words with any of these; avoid recurring openers like "Machines are…", "AI is…", "The robots…"):
 ${recentTitles || "(none yet)"}
 
-FORBIDDEN SUBJECT KEYWORDS (these proper nouns / topic words appeared in recent headlines — your headline MUST NOT contain ANY of these words; pick a completely different story from today's tweets):
+FORBIDDEN SUBJECT KEYWORDS (these proper nouns / topic words appeared in recent headlines — your headline MUST NOT contain ANY of these words; pick a completely different story from today's items):
 ${forbiddenSubjects.join(", ") || "(none yet)"}
 
-Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily column readers look forward to.`,
+Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily column readers look forward to.`,
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} tweets about autonomous systems, sorted by engagement. Write today's daily blog post:\n\n${tweetDigest}`,
+              content: `Here are today's ${tweets.length} news items about autonomous systems, sorted by engagement. Write today's daily blog post:\n\n${tweetDigest}`,
             },
           ],
         }),
@@ -279,7 +248,7 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
       rewriteAttempts++;
       const reason = overlapSubject
         ? `contains forbidden subject "${overlapSubject}" already used in recent headlines`
-        : `too similar to recent "${tooSimilar.title}"`;
+        : `too similar to recent "${tooSimilar?.title ?? "(unknown)"}"`;
       console.warn(`Headline "${title}" ${reason} — requesting rewrite (attempt ${rewriteAttempts})`);
       try {
         const rewriteRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -330,19 +299,19 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
           messages: [
             {
               role: "system",
-              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's X posts about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed.
+              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's news headlines (from Hacker News, Google News and Reddit) about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed.
 
 Format each idea EXACTLY as:
 ### [Idea Name]
 One paragraph (3-5 sentences) describing the opportunity, target market, why now, and how autonomous technology makes it viable.
 
-**Relevant posts:** [list 2-3 X post URLs from the provided tweets that inspired this idea, formatted as markdown links like [Author Name](url)]
+**Relevant sources:** [list 2-3 article URLs from the provided items that inspired this idea, formatted as markdown links like [Source/Headline](url)]
 
-Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas. ALWAYS include the "Relevant posts:" line with actual URLs from the tweet list.`,
+Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas. ALWAYS include the "Relevant sources:" line with actual URLs from the items list.`,
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} tweets about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
+              content: `Here are today's ${tweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
             },
           ],
         }),
