@@ -6,54 +6,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function fetchAllTweets(bearerToken: string, query: string, maxTotal = 200) {
-  const allTweets: any[] = [];
-  const users: Record<string, any> = {};
-  let nextToken: string | undefined;
-
-  while (allTweets.length < maxTotal) {
-    const twitterUrl = new URL("https://api.x.com/2/tweets/search/recent");
-    twitterUrl.searchParams.set("query", `${query} -is:retweet lang:en`);
-    twitterUrl.searchParams.set("max_results", "100");
-    twitterUrl.searchParams.set("tweet.fields", "created_at,public_metrics,author_id");
-    twitterUrl.searchParams.set("expansions", "author_id");
-    twitterUrl.searchParams.set("user.fields", "name,username");
-    if (nextToken) twitterUrl.searchParams.set("next_token", nextToken);
-
-    const res = await fetch(twitterUrl.toString(), {
-      headers: { Authorization: `Bearer ${bearerToken}` },
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("Twitter API error:", JSON.stringify(data));
-      throw new Error(`Twitter API error: ${data.detail || data.title}`);
-    }
-
-    if (data.includes?.users) {
-      for (const u of data.includes.users) users[u.id] = u;
-    }
-
-    if (data.data) {
-      for (const t of data.data) {
-        const user = users[t.author_id] || {};
-        allTweets.push({
-          id: t.id,
-          text: t.text,
-          author: user.name || "Unknown",
-          handle: `@${user.username || "unknown"}`,
-          username: user.username || "unknown",
-          likes: t.public_metrics?.like_count || 0,
-          retweets: t.public_metrics?.retweet_count || 0,
-        });
-      }
-    }
-
-    nextToken = data.meta?.next_token;
-    if (!nextToken || !data.data?.length) break;
+async function fetchAllItems(supabaseUrl: string, serviceKey: string): Promise<any[]> {
+  const res = await fetch(`${supabaseUrl}/functions/v1/news-feed`, {
+    headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`news-feed error: ${res.status} ${t}`);
   }
-
-  return allTweets;
+  const data = await res.json();
+  const items = data.items || data.tweets || [];
+  return items.map((i: any) => ({
+    id: i.id,
+    text: i.content,
+    author: i.username,
+    handle: i.handle,
+    username: (i.handle || "").replace(/^@/, ""),
+    likes: i.likes || 0,
+    retweets: i.retweets || 0,
+    url: i.url,
+  }));
 }
 
 async function generateCoverImage(
@@ -120,9 +92,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const bearerToken = Deno.env.get("TWITTER_BEARER_TOKEN");
-    if (!bearerToken) throw new Error("TWITTER_BEARER_TOKEN not configured");
-
     const lovableKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
 
