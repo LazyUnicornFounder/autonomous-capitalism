@@ -279,7 +279,7 @@ Do NOT list tweets. Do NOT use @handles. Tell a STORY. Make it feel like a daily
       rewriteAttempts++;
       const reason = overlapSubject
         ? `contains forbidden subject "${overlapSubject}" already used in recent headlines`
-        : `too similar to recent "${tooSimilar.title}"`;
+        : `too similar to recent "${tooSimilar?.title ?? "(unknown)"}"`;
       console.warn(`Headline "${title}" ${reason} — requesting rewrite (attempt ${rewriteAttempts})`);
       try {
         const rewriteRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
