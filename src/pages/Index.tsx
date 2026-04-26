@@ -55,7 +55,7 @@ const Index = () => {
               <span className="text-primary">Autonomous</span> news.<br />Delivered daily.
             </h2>
             <p className="text-muted-foreground font-body text-lg md:text-xl leading-relaxed mb-8 max-w-lg">
-              Every day, AI reads hundreds of <svg className="w-5 h-5 md:w-6 md:h-6 fill-primary inline -mt-0.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> posts about the <span className="text-primary font-bold">autonomous</span> revolution and sends you one sharp, story-driven <span className="text-primary font-bold">briefing</span> on what agents and machines are doing in business, finance, and society.
+              Every day, AI reads hundreds of headlines from Hacker News, Google News and Reddit about the <span className="text-primary font-bold">autonomous</span> revolution and sends you one sharp, story-driven <span className="text-primary font-bold">briefing</span> on what agents and machines are doing in business, finance, and society.
             </p>
             <EmailCapture variant="hero" />
           </div>
@@ -84,7 +84,7 @@ const Index = () => {
                 One daily briefing.<br /><span className="text-primary">Zero noise.</span>
               </h2>
               <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed mb-6">
-                Every day, AI reads hundreds of X posts about autonomous systems and distills them into a single, story-driven narrative. No lists, no fluff — just the signal that matters for business, finance, and society.
+                Every day, AI reads hundreds of headlines from Hacker News, Google News and Reddit about autonomous systems and distills them into a single, story-driven narrative. No lists, no fluff — just the signal that matters for business, finance, and society.
               </p>
               <a href="/briefings" className="inline-block bg-primary text-primary-foreground px-6 py-2.5 font-body font-bold text-sm tracking-wider hover:bg-primary/90 transition-colors">
                 READ BRIEFINGS →
@@ -93,11 +93,11 @@ const Index = () => {
             <div className="flex-1 space-y-4">
               <div className="flex gap-4">
                 <span className="text-primary font-display font-black text-lg shrink-0">01</span>
-                <p className="text-foreground/80 font-body text-sm">AI scans 500+ X posts daily about autonomous agents, machines, and systems.</p>
+                <p className="text-foreground/80 font-body text-sm">AI scans hundreds of headlines daily from Hacker News, Google News and Reddit on autonomous agents, machines, and systems.</p>
               </div>
               <div className="flex gap-4">
                 <span className="text-primary font-display font-black text-lg shrink-0">02</span>
-                <p className="text-foreground/80 font-body text-sm">Posts are ranked by engagement and synthesized into a cohesive narrative.</p>
+                <p className="text-foreground/80 font-body text-sm">Stories are ranked by engagement and synthesized into a cohesive narrative.</p>
               </div>
               <div className="flex gap-4">
                 <span className="text-primary font-display font-black text-lg shrink-0">03</span>
