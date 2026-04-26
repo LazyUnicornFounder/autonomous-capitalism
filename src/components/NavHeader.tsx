@@ -60,14 +60,6 @@ const NavHeader = () => {
             </Link>
           )}
           <a
-            href="https://x.com/SoloUnicorn"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:text-primary/80 transition-colors hidden sm:block"
-          >
-            <XIcon className="w-4 h-4 md:w-5 md:h-5 fill-current" />
-          </a>
-          <a
             href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7448781743005782016"
             target="_blank"
             rel="noopener noreferrer"
