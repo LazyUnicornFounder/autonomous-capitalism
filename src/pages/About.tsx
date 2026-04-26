@@ -18,9 +18,7 @@ const About = () => {
       <main className="container py-12 px-4 max-w-2xl mx-auto">
         <div className="space-y-8">
           <p className="text-foreground/90 font-body text-lg leading-relaxed">
-            Every day, AI reads hundreds of{" "}
-            <svg className="w-5 h-5 fill-primary inline -mt-0.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>{" "}
-            posts about the <span className="text-primary font-bold">autonomous</span> revolution and sends you one sharp, story-driven{" "}
+            Every day, AI reads hundreds of headlines from Hacker News, Google News, and Reddit about the <span className="text-primary font-bold">autonomous</span> revolution and sends you one sharp, story-driven{" "}
             <span className="text-primary font-bold">briefing</span> on what agents and machines are doing in business, finance, and society.
           </p>
 
