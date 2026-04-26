@@ -299,19 +299,19 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
           messages: [
             {
               role: "system",
-              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's X posts about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed.
+              content: `You are a venture strategist for "Autonomous Capitalism." Based on today's news headlines (from Hacker News, Google News and Reddit) about autonomous systems, generate 3-5 concrete, actionable business ideas that leverage the trends discussed.
 
 Format each idea EXACTLY as:
 ### [Idea Name]
 One paragraph (3-5 sentences) describing the opportunity, target market, why now, and how autonomous technology makes it viable.
 
-**Relevant posts:** [list 2-3 X post URLs from the provided tweets that inspired this idea, formatted as markdown links like [Author Name](url)]
+**Relevant sources:** [list 2-3 article URLs from the provided items that inspired this idea, formatted as markdown links like [Source/Headline](url)]
 
-Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas. ALWAYS include the "Relevant posts:" line with actual URLs from the tweet list.`,
+Be specific — include concrete product concepts, not vague "AI platform" ideas. Think like a founder who reads these trends and spots gaps. No preamble, jump straight into the ideas. ALWAYS include the "Relevant sources:" line with actual URLs from the items list.`,
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} tweets about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
+              content: `Here are today's ${tweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
             },
           ],
         }),
