@@ -135,16 +135,27 @@ Deno.serve(async (req) => {
     // Sort by engagement (HN points + comments / Reddit score + comments)
     tweets.sort((a: any, b: any) => (b.likes + b.retweets) - (a.likes + a.retweets));
 
-    // Fetch recent headlines to avoid similarity
+    // Fetch recent posts (title + content + summary) to avoid repeating headlines OR stories
     const { data: recentPosts } = await supabase
       .from("blog_posts")
-      .select("title, published_date")
+      .select("title, summary, content, published_date")
       .order("published_date", { ascending: false })
       .limit(30);
     const recentTitles = (recentPosts || [])
       .map((p: any) => `- "${p.title}" (${p.published_date})`)
       .join("\n");
-    console.log(`Loaded ${recentPosts?.length || 0} recent headlines for de-duplication`);
+    console.log(`Loaded ${recentPosts?.length || 0} recent posts for de-duplication`);
+
+    // Build a corpus of recently covered story text (title + summary + first 1500 chars of content)
+    const recentCorpus = (recentPosts || [])
+      .map((p: any) => `${p.title}\n${p.summary || ""}\n${(p.content || "").substring(0, 1500)}`)
+      .join("\n\n");
+
+    // Brief synopses of the last 14 posts for the AI's context
+    const recentSynopses = (recentPosts || [])
+      .slice(0, 14)
+      .map((p: any) => `- (${p.published_date}) "${p.title}" — ${(p.summary || "").substring(0, 220)}`)
+      .join("\n");
 
     // Extract forbidden subject keywords (proper nouns + meaningful nouns) from recent headlines
     const STOPWORDS_SUBJ = new Set(["the","a","an","is","are","of","to","in","on","and","or","for","with","by","at","as","its","it","this","that","be","from","into","over","new","how","why","but","not","now","up","out","off","you","your","our","we","they","them","their","has","have","had","was","were","will","can","could","should","would","may","might","than","then","so","if","about","after","before","while","when","where","who","what","which","there","here","just","also","more","most","some","any","all","one","two","three","first","last","next","each","other","another","such","only","own","same","very","still","ever","never","once","again","like","make","made","get","got","take","took","go","went","come","came","see","saw","say","said","told","tell","know","knew","think","thought","starts","starting","began","begin","begins","starts","start","starting","ends","end","ending","continues","continue","continuing","says","saying","gets","getting","makes","making","goes","going","comes","coming","sees","seeing","tells","telling","thinks","thinking","becomes","became","becoming","keeps","keeping","kept","puts","putting","put","let","lets","letting","yet","much","many","few","fewer","less","lot","lots","big","small","high","low","old"]);
