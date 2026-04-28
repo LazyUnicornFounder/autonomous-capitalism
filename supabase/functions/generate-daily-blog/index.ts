@@ -135,16 +135,27 @@ Deno.serve(async (req) => {
     // Sort by engagement (HN points + comments / Reddit score + comments)
     tweets.sort((a: any, b: any) => (b.likes + b.retweets) - (a.likes + a.retweets));
 
-    // Fetch recent headlines to avoid similarity
+    // Fetch recent posts (title + content + summary) to avoid repeating headlines OR stories
     const { data: recentPosts } = await supabase
       .from("blog_posts")
-      .select("title, published_date")
+      .select("title, summary, content, published_date")
       .order("published_date", { ascending: false })
       .limit(30);
     const recentTitles = (recentPosts || [])
       .map((p: any) => `- "${p.title}" (${p.published_date})`)
       .join("\n");
-    console.log(`Loaded ${recentPosts?.length || 0} recent headlines for de-duplication`);
+    console.log(`Loaded ${recentPosts?.length || 0} recent posts for de-duplication`);
+
+    // Build a corpus of recently covered story text (title + summary + first 1500 chars of content)
+    const recentCorpus = (recentPosts || [])
+      .map((p: any) => `${p.title}\n${p.summary || ""}\n${(p.content || "").substring(0, 1500)}`)
+      .join("\n\n");
+
+    // Brief synopses of the last 14 posts for the AI's context
+    const recentSynopses = (recentPosts || [])
+      .slice(0, 14)
+      .map((p: any) => `- (${p.published_date}) "${p.title}" — ${(p.summary || "").substring(0, 220)}`)
+      .join("\n");
 
     // Extract forbidden subject keywords (proper nouns + meaningful nouns) from recent headlines
     const STOPWORDS_SUBJ = new Set(["the","a","an","is","are","of","to","in","on","and","or","for","with","by","at","as","its","it","this","that","be","from","into","over","new","how","why","but","not","now","up","out","off","you","your","our","we","they","them","their","has","have","had","was","were","will","can","could","should","would","may","might","than","then","so","if","about","after","before","while","when","where","who","what","which","there","here","just","also","more","most","some","any","all","one","two","three","first","last","next","each","other","another","such","only","own","same","very","still","ever","never","once","again","like","make","made","get","got","take","took","go","went","come","came","see","saw","say","said","told","tell","know","knew","think","thought","starts","starting","began","begin","begins","starts","start","starting","ends","end","ending","continues","continue","continuing","says","saying","gets","getting","makes","making","goes","going","comes","coming","sees","seeing","tells","telling","thinks","thinking","becomes","became","becoming","keeps","keeping","kept","puts","putting","put","let","lets","letting","yet","much","many","few","fewer","less","lot","lots","big","small","high","low","old"]);
@@ -157,8 +168,30 @@ Deno.serve(async (req) => {
     const forbiddenSubjects = Array.from(recentSubjectSet).sort();
     console.log(`Forbidden subject keywords (${forbiddenSubjects.length}): ${forbiddenSubjects.slice(0, 40).join(", ")}...`);
 
-    // Build news digest for AI (real article URLs, not X)
-    const tweetDigest = tweets
+    // Filter out news items whose URL was already cited or whose text overlaps heavily with prior coverage
+    const recentCorpusLower = recentCorpus.toLowerCase();
+    const STOP_FILTER = new Set(["the","a","an","is","are","of","to","in","on","and","or","for","with","by","at","as","its","it","this","that","be","from","into","over","new","how","why","but","not","now","up","out","off","you","your","our","we","they","them","their","has","have","had","was","were","will","can","could","should","would","may","might","than","then","so","if","about","after","before","while","when","where","who","what","which","there","here","just","also","more","most","some","any","all","one","two","three"]);
+    const meaningfulTokens = (s: string) => {
+      const out = new Set<string>();
+      for (const w of s.toLowerCase().replace(/[^\w\s'-]/g, " ").split(/\s+/)) {
+        if (w && w.length > 3 && !STOP_FILTER.has(w)) out.add(w);
+      }
+      return out;
+    };
+    const freshTweets = tweets.filter((t: any) => {
+      if (t.url && recentCorpusLower.includes(String(t.url).toLowerCase())) return false;
+      const toks = meaningfulTokens(t.text || "");
+      if (toks.size < 4) return true;
+      let hits = 0;
+      for (const w of toks) if (recentCorpusLower.includes(w)) hits++;
+      // If 80%+ of meaningful words from this item already appear in prior briefings, drop it
+      return hits / toks.size < 0.8;
+    });
+    console.log(`Filtered ${tweets.length - freshTweets.length} already-covered items; ${freshTweets.length} fresh items remain`);
+    const workingTweets = freshTweets.length >= 5 ? freshTweets : tweets;
+
+    // Build news digest for AI (real article URLs)
+    const tweetDigest = workingTweets
       .map(
         (t: any, i: number) =>
           `${i + 1}. ${t.author} (${t.handle}): "${t.text}" [${t.likes} pts, ${t.retweets} comments] URL: ${t.url}`
@@ -193,6 +226,9 @@ Format:
 RECENT HEADLINES TO AVOID DUPLICATING (your headline must cover a DIFFERENT STORY — different company, different person, different event, different topic; do not share 3+ meaningful words with any of these; avoid recurring openers like "Machines are…", "AI is…", "The robots…"):
 ${recentTitles || "(none yet)"}
 
+RECENTLY COVERED STORIES (synopses of the last ~14 briefings — DO NOT rewrite or rehash any of these stories, angles, or framings; pick genuinely new developments from today's items):
+${recentSynopses || "(none yet)"}
+
 FORBIDDEN SUBJECT KEYWORDS (these proper nouns / topic words appeared in recent headlines — your headline MUST NOT contain ANY of these words; pick a completely different story from today's items):
 ${forbiddenSubjects.join(", ") || "(none yet)"}
 
@@ -200,7 +236,7 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} news items about autonomous systems, sorted by engagement. Write today's daily blog post:\n\n${tweetDigest}`,
+              content: `Here are today's ${workingTweets.length} news items about autonomous systems, sorted by engagement (already filtered to remove stories covered in previous briefings). Write today's daily blog post on a NEW angle not covered before:\n\n${tweetDigest}`,
             },
           ],
         }),
@@ -311,7 +347,7 @@ Be specific — include concrete product concepts, not vague "AI platform" ideas
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
+              content: `Here are today's ${workingTweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
             },
           ],
         }),
