@@ -226,6 +226,9 @@ Format:
 RECENT HEADLINES TO AVOID DUPLICATING (your headline must cover a DIFFERENT STORY — different company, different person, different event, different topic; do not share 3+ meaningful words with any of these; avoid recurring openers like "Machines are…", "AI is…", "The robots…"):
 ${recentTitles || "(none yet)"}
 
+RECENTLY COVERED STORIES (synopses of the last ~14 briefings — DO NOT rewrite or rehash any of these stories, angles, or framings; pick genuinely new developments from today's items):
+${recentSynopses || "(none yet)"}
+
 FORBIDDEN SUBJECT KEYWORDS (these proper nouns / topic words appeared in recent headlines — your headline MUST NOT contain ANY of these words; pick a completely different story from today's items):
 ${forbiddenSubjects.join(", ") || "(none yet)"}
 
@@ -233,7 +236,7 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} news items about autonomous systems, sorted by engagement. Write today's daily blog post:\n\n${tweetDigest}`,
+              content: `Here are today's ${workingTweets.length} news items about autonomous systems, sorted by engagement (already filtered to remove stories covered in previous briefings). Write today's daily blog post on a NEW angle not covered before:\n\n${tweetDigest}`,
             },
           ],
         }),
