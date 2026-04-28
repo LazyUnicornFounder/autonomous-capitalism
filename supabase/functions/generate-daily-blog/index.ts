@@ -347,7 +347,7 @@ Be specific — include concrete product concepts, not vague "AI platform" ideas
             },
             {
               role: "user",
-              content: `Here are today's ${tweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
+              content: `Here are today's ${workingTweets.length} news items about autonomous systems with their URLs. Generate business ideas inspired by these trends:\n\n${tweetDigest.substring(0, 12000)}`,
             },
           ],
         }),
