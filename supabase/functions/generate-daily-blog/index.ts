@@ -308,8 +308,8 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
         title = nw.length > 10 ? nw.slice(0, 10).join(" ") : newTitle;
         console.log(`Rewritten headline (attempt ${rewriteAttempts}): "${title}"`);
         const newSubjects = extractSubjects(title).map((w) => w.toLowerCase());
-        overlapSubject = newSubjects.find((w) => recentSubjectSet.has(w));
-        tooSimilar = (recentPosts || []).find((p: any) => similarity(title, p.title) >= 0.5);
+        const countOverlapNew = (a: string) => extractSubjects(a).map((w) => w.toLowerCase()).filter((w) => newSubjects.includes(w)).length;
+        tooSimilar = (recentPosts || []).find((p: any) => countOverlapNew(p.title) >= 2 || similarity(title, p.title) >= 0.6);
       } catch (e) {
         console.error("Rewrite error (non-fatal):", e);
         break;
