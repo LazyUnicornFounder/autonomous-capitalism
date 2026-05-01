@@ -276,16 +276,14 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
       for (const w of A) if (B.has(w)) inter++;
       return inter / Math.min(A.size, B.size);
     };
+    // Only flag headline as "too similar" if it shares 2+ meaningful subject words with a prior headline
     const titleSubjectsLower = extractSubjects(title).map((w) => w.toLowerCase());
-    let overlapSubject = titleSubjectsLower.find((w) => recentSubjectSet.has(w));
-    let tooSimilar = (recentPosts || []).find((p: any) => similarity(title, p.title) >= 0.5);
+    const countOverlap = (a: string) => extractSubjects(a).map((w) => w.toLowerCase()).filter((w) => titleSubjectsLower.includes(w)).length;
+    let tooSimilar = (recentPosts || []).find((p: any) => countOverlap(p.title) >= 2 || similarity(title, p.title) >= 0.6);
     let rewriteAttempts = 0;
-    while ((tooSimilar || overlapSubject) && rewriteAttempts < 3) {
+    while (tooSimilar && rewriteAttempts < 2) {
       rewriteAttempts++;
-      const reason = overlapSubject
-        ? `contains forbidden subject "${overlapSubject}" already used in recent headlines`
-        : `too similar to recent "${tooSimilar?.title ?? "(unknown)"}"`;
-      console.warn(`Headline "${title}" ${reason} — requesting rewrite (attempt ${rewriteAttempts})`);
+      console.warn(`Headline "${title}" too similar to recent "${tooSimilar?.title ?? "(unknown)"}" — requesting rewrite (attempt ${rewriteAttempts})`);
       try {
         const rewriteRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -293,8 +291,8 @@ Do NOT list items. Do NOT use @handles. Tell a STORY. Make it feel like a daily 
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [
-              { role: "system", content: `Rewrite the given headline so it covers a COMPLETELY DIFFERENT STORY than these recent headlines. Different company, person, event, and topic. Max 10 words. No periods. No markdown. Reply with ONLY the new headline text.\n\nRecent headlines:\n${recentTitles}\n\nFORBIDDEN WORDS (do NOT use ANY of these): ${forbiddenSubjects.join(", ")}\n\nPick a different angle from the article body — focus on a subject NOT in the forbidden list.` },
-              { role: "user", content: `Original headline: ${title}\n\nArticle opening: ${body.substring(0, 800)}` },
+              { role: "system", content: `You will rewrite a headline so it accurately summarizes the ARTICLE BODY below using DIFFERENT WORDING than the recent headlines. CRITICAL RULES:\n- The new headline MUST describe what the article body is actually about — do NOT invent a different story, do NOT pick an unrelated topic.\n- Max 10 words. No periods. No markdown. No quotes.\n- Avoid reusing the exact phrasing of these recent headlines:\n${recentTitles}\n\nReply with ONLY the new headline text.` },
+              { role: "user", content: `Original headline: ${title}\n\nFULL ARTICLE BODY (your headline MUST describe THIS content):\n${body.substring(0, 2500)}` },
             ],
           }),
         });
