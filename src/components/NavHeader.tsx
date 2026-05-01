@@ -9,7 +9,6 @@ const LinkedInIcon = ({ className }: { className?: string }) => (
 const navLinks = [
   { to: "/briefings", label: "Briefings" },
   { to: "/ideas", label: "Ideas" },
-  { to: "/manifesto", label: "Manifesto" },
   { to: "/about", label: "About" },
 ];
 

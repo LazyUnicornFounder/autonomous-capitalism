@@ -11,7 +11,6 @@ import Subscribe from "./pages/Subscribe.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Ideas from "./pages/Ideas.tsx";
 import About from "./pages/About.tsx";
-import Manifesto from "./pages/Manifesto.tsx";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -33,7 +32,6 @@ const App = () => (
           <Route path="/unsubscribed" element={<Unsubscribed />} />
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/about" element={<About />} />
-          <Route path="/manifesto" element={<Manifesto />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
